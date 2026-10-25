@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rekap Sewa iPhone (Admin)</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#eef2f5;--panel:#fff;--ink:#14212b;--mute:#5d6e7b;--line:#d5dde4;--accent:#0b6e8a;--ok:#12794a;--warn:#b4570a;--c6:#0b6e8a;--c12:#5b4bb5;--c24:#b4570a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f171d;--panel:#18232b;--ink:#e6edf2;--mute:#8fa1ae;--line:#2a3944;--accent:#4cc3e0;--ok:#4cd08c;--warn:#f0a35a;--c6:#4cc3e0;--c12:#a597f0;--c24:#f0a35a}}
+:root[data-theme="dark"]{--bg:#0f171d;--panel:#18232b;--ink:#e6edf2;--mute:#8fa1ae;--line:#2a3944;--accent:#4cc3e0;--ok:#4cd08c;--warn:#f0a35a;--c6:#4cc3e0;--c12:#a597f0;--c24:#f0a35a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Plus Jakarta Sans",system-ui,sans-serif}
+main{max-width:1000px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:26px;font-weight:800;margin:0 0 2px}
+.sub{color:var(--mute);margin:0 0 18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+h2{font-size:15px;margin:0 0 12px;font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.tile{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:10px;padding:12px 14px}
+.tile b{display:block;font-size:13px;color:var(--mute);font-weight:600}
+.tile .n{font-size:28px;font-weight:800;line-height:1.2}
+.tile .r{color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+label{display:block;font-size:13px;color:var(--mute);margin-bottom:3px}
+input,select,button{font:inherit;color:var(--ink)}
+input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--bg)}
+button{cursor:pointer;border:1px solid var(--line);background:var(--panel);padding:8px 14px;border-radius:7px}
+button.pri{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+:root[data-theme="dark"] button.pri{color:#06232c}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center}
+.bar input{max-width:220px}
+.bar .sp{flex:1}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:680px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:13px;color:var(--mute);font-weight:600}
+td.ip{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.dur{font-weight:600;color:var(--c)}
+.st-a{color:var(--ok);font-weight:600}
+.st-s{color:var(--mute)}
+.empty{padding:24px;text-align:center;color:var(--mute)}
+.del{padding:3px 9px;font-size:13px;color:var(--warn)}
+.tot{font-weight:800}
+#inv,#pl{min-width:0}
+#inv td:not(:first-child),#inv th:not(:first-child),#pl td:not(:first-child),#pl th:not(:first-child){text-align:right}
+#inv td.u,#inv th.u{text-align:left;white-space:normal;min-width:160px}
+.ir{display:grid;grid-template-columns:minmax(0,1fr) 52px 52px 52px;gap:0 6px;padding:3px 0}
+.ir span+span{text-align:right}
+.ih{font-weight:800;margin-top:10px;border-bottom:1px solid var(--line)}
+.iu span:first-child{padding-left:28px}
+.iu i{color:var(--mute);font-style:normal}
+.badge{font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;border:1px solid var(--line);color:var(--mute);vertical-align:middle;margin-left:6px}
+body.view .adm{display:none!important}
+#mtab{min-width:0}
+#mtab td:not(:first-child),#mtab th:not(:first-child){text-align:right}
+#mtab tbody tr{cursor:pointer}
+#mtab tr.msel td{font-weight:800}
+.hint{color:var(--mute);font-size:13px;margin-top:8px;min-height:1em}
+summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <h1>Rekap Sewa IP <span class="badge" id="badge"></span></h1>
+  <p class="sub">Catat sewa per unit dan kode investor untuk paket 24 Jam, 12 Jam, dan 6 Jam. </p>
+  <p class="sub" id="sync" style="margin-top:-12px">Data tersimpan di browser ini.</p>
+
+  <div class="bar"><label for="mon" style="margin:0">Bulan</label><select id="mon" style="max-width:240px"></select><button id="monnow">Bulan ini</button></div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <details class="panel"><summary>Ringkasan per bulan</summary>
+    <div class="wrap" style="margin-top:10px"><table id="mtab"></table></div>
+  </details>
+
+  <div class="panel">
+    <h2>Rekap per investor <span id="plabel" style="color:var(--mute);font-weight:400"></span></h2>
+    <div id="inv"></div>
+    <div class="bar" style="margin:14px 0 0"><button id="copyinv">Salin rekap investor</button></div>
+  </div>
+
+  <div class="panel adm">
+    <h2>Tambah sewa</h2>
+    <div class="grid">
+      <div style="grid-column:span 2"><label for="ip">Unit + kode investor</label><input id="ip" placeholder="IP 13 Pink AM"></div>
+      <div><label for="du">Durasi</label>
+        <select id="du"><option value="24">24 Jam</option><option value="12">12 Jam</option><option value="6">6 Jam</option></select></div>
+      <div><label for="hg">Harga (Rp)</label><input id="hg" type="number" min="0" placeholder="30000"></div>
+      <div><button class="pri" id="add" style="width:100%">Simpan sewa</button></div>
+    </div>
+    <div class="hint" id="hint"></div>
+  </div>
+
+  <details class="panel"><summary>Hubungkan Google Sheets</summary>
+    <div class="grid" style="margin-top:10px">
+      <div style="grid-column:span 2"><label for="shurl">Alamat Web App (berakhiran /exec)</label><input id="shurl" placeholder="https://script.google.com/macros/s/.../exec"></div>
+      <div><label for="shkey" id="shkl">Kunci</label><input id="shkey" type="password" placeholder="kunci rahasia"></div>
+      <div><button class="pri" id="shconn" style="width:100%">Simpan dan hubungkan</button></div>
+      <div class="adm" style="grid-column:span 2"><label for="shvk">Kunci penonton (untuk tautan penonton)</label><input id="shvk" type="password" placeholder="kunci penonton"></div>
+      <div class="adm"><button id="shlink" style="width:100%">Salin tautan penonton</button></div>
+    </div>
+  </details>
+
+  <details class="panel adm"><summary>Cadangan data</summary>
+    <div class="bar" style="margin-top:10px"><button id="bkfile">Simpan file cadangan</button><button id="bkcopy">Salin teks cadangan</button></div>
+    <label for="bktxt">Pulihkan dari teks cadangan</label>
+    <textarea id="bktxt" rows="3" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);font:inherit" placeholder="Tempel teks cadangan di sini"></textarea>
+    <div class="bar" style="margin:8px 0 0"><button id="bkrestore">Pulihkan data</button></div>
+  </details>
+
+  <details class="panel adm"><summary>Daftar harga</summary>
+    <div class="grid" style="margin-top:10px">
+      <div style="grid-column:span 2"><label for="pn">Nama unit</label><input id="pn" placeholder="IP 15 Pro Max"></div>
+      <div><label for="pp24">24 Jam (Rp)</label><input id="pp24" type="number" min="0"></div>
+      <div><label for="pp12">12 Jam (Rp)</label><input id="pp12" type="number" min="0"></div>
+      <div><label for="pp6">6 Jam (Rp)</label><input id="pp6" type="number" min="0"></div>
+      <div><button class="pri" id="pladd" style="width:100%">Simpan harga</button></div>
+      <div><button id="plcancel" style="width:100%;display:none">Batal</button></div>
+    </div>
+    <div class="hint">Klik <b>Ubah</b> untuk mengganti nama atau harga unit, lalu klik <b>Perbarui harga</b>. Klik <b>Hapus</b> untuk menghapus unit yang sudah tidak ada; unit bawaan pricelist yang terhapus bisa dipulihkan. Untuk unit baru, isi nama seperti saat input sewa (misalnya IP 15 Pro Max). Sewa yang sudah tercatat tidak berubah, dan daftar ini tersimpan di browser ini.</div>
+    <div class="wrap" style="margin-top:10px"><table id="pl"></table></div>
+    <div style="margin-top:10px"><button id="plrest" style="display:none">Pulihkan unit bawaan yang dihapus</button></div>
+  </details>
+
+  <div class="panel">
+    <div class="bar">
+      <button class="chip on" data-f="0">Semua</button>
+      <button class="chip" data-f="6">6 Jam</button>
+      <button class="chip" data-f="12">12 Jam</button>
+      <button class="chip" data-f="24">24 Jam</button>
+      <input id="q" placeholder="Cari unit atau kode" aria-label="Cari">
+      <span class="sp"></span>
+      <button id="copy">Salin rekap</button>
+      <button id="clear" class="adm">Hapus semua</button>
+    </div>
+    <div class="wrap"><table>
+      <thead><tr><th>No</th><th>Unit</th><th>Kode investor</th><th>Durasi</th><th>Tanggal transaksi</th><th>Harga</th><th class="adm"></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+  </div>
+</main>
+
+<script>
+(function(){
+  var ADMIN=true, KEY="rekap-sewa-iphone-v1", data={rentals:[],prices:{6:10000,12:18000,24:30000}}, filter=0;
+  var $=function(i){return document.getElementById(i)};
+  try{var s=localStorage.getItem(KEY); if(s){var d=JSON.parse(s); if(d&&d.rentals&&d.prices) data=d;}}catch(e){}
+  var CK="rekap-sheets-cfg", QK="rekap-queue", cfg={url:"",key:""}, queue=[], busy=false;
+  try{var c0=JSON.parse(localStorage.getItem(CK)||"{}"); if(c0&&c0.url)cfg=c0}catch(e){}
+  try{queue=JSON.parse(localStorage.getItem(QK)||"[]")||[]}catch(e){queue=[]}
+  function setSync(t){var e=$("sync");if(e)e.textContent=t}
+  function jam(){return new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"})}
+  function save(){
+    data.t=Date.now();
+    try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}
+  }
+  function saveQ(){try{localStorage.setItem(QK,JSON.stringify(queue))}catch(e){}}
+  function enqueue(op){
+    if(!cfg.url||!ADMIN)return;
+    queue.push(op); saveQ(); flush();
+  }
+  function applyServer(list){
+    data.rentals=list.map(function(x){return {id:String(x.start),ip:String(x.ip),name:String(x.name),dur:+x.dur,start:+x.start,price:+x.price}});
+    save(); render();
+  }
+  function flush(){
+    if(!cfg.url||!ADMIN||busy||!queue.length)return;
+    busy=true; setSync("Menyimpan ke Google Sheets...");
+    (function next(){
+      var op=queue[0], body={key:cfg.key}, k;
+      for(k in op)body[k]=op[k];
+      fetch(cfg.url,{method:"POST",body:JSON.stringify(body)})
+        .then(function(r){return r.json()})
+        .then(function(j){
+          if(!j.ok)throw 0;
+          queue.shift(); saveQ();
+          if(queue.length){next();return}
+          busy=false; applyServer(j.rentals);
+          setSync("Tersimpan di Google Sheets ("+j.count+" sewa), pukul "+jam()+".");
+        })
+        .catch(function(){busy=false;setSync("Gagal terhubung ke Google Sheets. Data tersimpan di browser ini dan akan dicoba lagi otomatis.")});
+    })();
+  }
+  function pull(first){
+    if(!cfg.url||busy)return;
+    if(queue.length){flush();return}
+    fetch(cfg.url+(cfg.url.indexOf("?")>-1?"&":"?")+"key="+encodeURIComponent(cfg.key))
+      .then(function(r){return r.json()})
+      .then(function(j){
+        if(!j.ok)throw 0;
+        if(queue.length||busy)return;
+        if(first&&ADMIN){
+          var have={}; j.rentals.forEach(function(x){have[x.start]=1});
+          var extra=data.rentals.filter(function(r){return !have[r.start]});
+          if(extra.length){extra.forEach(function(r){queue.push({op:"add",rental:r})}); saveQ(); flush(); return}
+        }
+        applyServer(j.rentals);
+        setSync("Tersinkron dengan Google Sheets ("+j.rentals.length+" sewa), pukul "+jam()+".");
+      })
+      .catch(function(){setSync("Gagal membaca Google Sheets. Periksa alamat dan kunci.")});
+  }
+  function poll(){
+    if(!cfg.url||document.visibilityState==="hidden")return;
+    if(queue.length)flush(); else pull(false);
+  }
+  setInterval(poll,20000);
+  document.addEventListener("visibilitychange",poll);
+  function esc(t){return String(t).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+  function rp(n){return "Rp"+Number(n).toLocaleString("id-ID")}
+  function fmt(t){return new Date(t).toLocaleString("id-ID",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})}
+  function localNow(){var d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
+  function left(end){var m=Math.round((end-Date.now())/60000);return Math.floor(m/60)+"j "+(m%60)+"m"}
+
+  var month=mk(Date.now());
+  function mk(t){var d=new Date(t);return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)}
+  function mlabel(k){var p=k.split("-");return new Date(+p[0],+p[1]-1,1).toLocaleDateString("id-ID",{month:"long",year:"numeric"})}
+  function periode(){return month==="all"?"Semua bulan":mlabel(month)}
+  function monthsList(){var m={};m[mk(Date.now())]=1;data.rentals.forEach(function(r){m[mk(r.start)]=1});return Object.keys(m).sort().reverse()}
+  function view(){return data.rentals.filter(function(r){return month==="all"||mk(r.start)===month})}
+  var invTxt="";
+  function render(){
+    var now=Date.now(), q=$("q").value.trim().toLowerCase(), tiles="";
+
+    var ml=monthsList(), cm=mk(Date.now());
+    if(month!=="all"&&ml.indexOf(month)<0)month=cm;
+    $("mon").innerHTML='<option value="all">Semua bulan</option>'+ml.map(function(k){return '<option value="'+k+'">'+mlabel(k)+(k===cm?' (bulan ini)':'')+'</option>'}).join('');
+    $("mon").value=month;
+    $("plabel").textContent="· "+periode();
+    $("mtab").innerHTML='<thead><tr><th>Bulan</th><th>Sewa</th><th>24</th><th>12</th><th>6</th><th>Pendapatan</th></tr></thead><tbody>'+ml.map(function(k){
+      var l=data.rentals.filter(function(r){return mk(r.start)===k});
+      function c(h){return l.filter(function(r){return r.dur===h}).length}
+      return '<tr data-m="'+k+'"'+(k===month?' class="msel"':'')+'><td>'+mlabel(k)+'</td><td>'+l.length+'</td><td>'+c(24)+'</td><td>'+c(12)+'</td><td>'+c(6)+'</td><td>'+rp(l.reduce(function(a,r){return a+r.price},0))+'</td></tr>';
+    }).join("")+'</tbody>';
+    var V=view();
+    [24,12,6].forEach(function(h){
+      var l=V.filter(function(r){return r.dur===h});
+      var sum=l.reduce(function(a,r){return a+r.price},0);
+      tiles+='<div class="tile" style="--c:var(--c'+h+')"><b>Paket '+h+' Jam</b><span class="n">'+l.length+' sewa</span><span class="r">'+rp(sum)+'</span></div>';
+    });
+    var all=V.reduce(function(a,r){return a+r.price},0);
+    tiles+='<div class="tile" style="--c:var(--ink)"><b>Total</b><span class="n">'+V.length+' sewa</span><span class="r tot">'+rp(all)+'</span></div>';
+    $("tiles").innerHTML=tiles;
+
+    var g={};
+    V.slice().sort(function(a,b){return a.start-b.start}).forEach(function(x){
+      var k=x.name.toUpperCase(), u=g[k]=g[k]||{};
+      var c=u[x.ip]=u[x.ip]||{24:0,12:0,6:0}; c[x.dur]++;
+    });
+    var ks=Object.keys(g).sort(), D=[24,12,6];
+    function pad(t,n){t=String(t);while(t.length<n)t+=" ";return t}
+    invTxt="Rekap "+periode()+"\n"+ks.map(function(k){
+      return pad(k,26)+D.map(function(d){return pad(d,6)}).join("")+"\n"+Object.keys(g[k]).map(function(n){return (pad("        "+n,26)+D.map(function(d){return pad(g[k][n][d]||"",6)}).join("")).replace(/\s+$/,"")}).join("\n");
+    }).join("\n");
+    $("inv").innerHTML=ks.length?ks.map(function(k){
+      return '<div class="ir ih"><span>'+esc(k)+'</span><span>24</span><span>12</span><span>6</span></div>'+Object.keys(g[k]).map(function(n){
+        return '<div class="ir iu"><span>'+esc(n)+'</span>'+D.map(function(d){return '<span>'+(g[k][n][d]||'<i>-</i>')+'</span>'}).join('')+'</div>';
+      }).join('');
+    }).join(''):'<div class="empty">Belum ada data.</div>';
+
+    var list=V.filter(function(r){
+      return (!filter||r.dur===filter)&&(!q||(r.ip+" "+r.name).toLowerCase().indexOf(q)>-1);
+    }).sort(function(a,b){return b.start-a.start});
+    $("rows").innerHTML=list.length?list.map(function(r,i){
+      return '<tr><td>'+(i+1)+'</td><td class="ip">'+esc(r.ip)+'</td><td>'+esc(r.name)+'</td><td class="dur" style="--c:var(--c'+r.dur+')">'+r.dur+' Jam</td><td>'+fmt(r.start)+'</td><td>'+rp(r.price)+'</td><td class="adm"><button class="del" data-id="'+r.id+'">Hapus</button></td></tr>';
+    }).join(""):'<tr><td colspan="7" class="empty">Belum ada sewa pada periode ini.</td></tr>';
+  }
+
+  $("add").onclick=function(){
+    var raw=$("ip").value.trim().split(/\s+/), nm=raw.length>1?raw.pop():"", ip=raw.join(" "), du=+$("du").value;
+    if(!ip||!nm||$("hg").value===""){alert("Isi unit dan kode investor (contoh: IP 13 Pink AM) dan harga.");return}
+    var t=Date.now(), rec={id:String(t),ip:ip,name:nm,dur:du,start:t,price:+$("hg").value||0};
+    data.rentals.push(rec); save(); enqueue({op:"add",rental:rec});
+    $("ip").value=""; $("hg").value=""; $("hint").textContent=""; render();
+  };
+  document.querySelectorAll(".chip").forEach(function(b){
+    b.onclick=function(){filter=+b.dataset.f;document.querySelectorAll(".chip").forEach(function(c){c.classList.toggle("on",c===b)});render()};
+  });
+  $("q").oninput=render;
+  $("mon").onchange=function(){month=this.value;render()};
+  $("monnow").onclick=function(){month=mk(Date.now());render()};
+  $("mtab").onclick=function(e){
+    var tr=e.target.closest?e.target.closest("tr"):null;
+    if(tr&&tr.dataset.m){month=tr.dataset.m;render();try{window.scrollTo(0,0)}catch(x){}}
+  };
+  $("rows").onclick=function(e){
+    var id=e.target.dataset&&e.target.dataset.id; if(!id)return;
+    var gone=data.rentals.filter(function(r){return String(r.id)===id})[0];
+    data.rentals=data.rentals.filter(function(r){return String(r.id)!==id}); save(); render();
+    if(gone)enqueue({op:"del",start:gone.start});
+  };
+  $("clear").onclick=function(){if(data.rentals.length&&confirm("Hapus semua data sewa?")){data.rentals=[];save();render();enqueue({op:"clear"})}};
+  $("copy").onclick=function(){
+    var V=view(), t="REKAP SEWA IP - "+periode()+"\n";
+    [24,12,6].forEach(function(h){
+      var l=V.filter(function(r){return r.dur===h});
+      t+=h+" Jam: "+l.length+" sewa, "+rp(l.reduce(function(a,r){return a+r.price},0))+"\n";
+    });
+    t+="Total: "+V.length+" sewa, "+rp(V.reduce(function(a,r){return a+r.price},0));
+    try{navigator.clipboard.writeText(t).then(function(){$("copy").textContent="Tersalin"; setTimeout(function(){$("copy").textContent="Salin rekap"},1500)})}catch(e){prompt("Salin rekap:",t)}
+  };
+  var BASE=[["ip 16 pro max","IP 16 Pro Max",250,230,200],["ip 15 pro","IP 15 Pro",180,170,150],["ip 14 pro","IP 14 Pro",170,150,120],["ip 12 pro max","IP 12 Pro Max",120,110,90],
+    ["ip 12 pro","IP 12 Pro",110,100,85],["ip 11 pro","IP 11 Pro",100,90,80],["ip 15 plus","IP 15 Plus",155,145,115],["ip 14 plus","IP 14 Plus",130,120,100],
+    ["ip 13","IP 13 Basic/Mini",120,110,90],["ip 12 mini","IP 12 Mini",100,90,75],["ip 11","IP 11 Basic",95,85,70],["ip xr","IP XR",80,70,60]];
+  var COL={24:2,12:3,6:4};
+  function findModel(t){
+    var u=t.toLowerCase().replace(/\s+/g," ").trim().replace(/^iphone\b/,"ip"), best=null;
+    allPL().forEach(function(m){if((u===m[0]||u.indexOf(m[0]+" ")===0)&&(!best||m[0].length>best[0].length))best=m});
+    return best;
+  }
+  function autoPrice(){
+    var t=$("ip").value, m=findModel(t), h=$("hint");
+    if(!m){h.textContent=t.trim()?"Model belum ada di daftar harga, isi harga manual.":"";return}
+    var du=+$("du").value, v=m[COL[du]];
+    $("hg").value=v; h.textContent="Harga daftar "+m[1]+" "+du+" Jam: "+rp(v)+". Bisa diubah.";
+  }
+  var CUS=[], HID=[], editKey=null;
+  try{CUS=JSON.parse(localStorage.getItem("rekap-pl-custom")||"[]")||[]}catch(e){CUS=[]}
+  try{HID=JSON.parse(localStorage.getItem("rekap-pl-hidden")||"[]")||[]}catch(e){HID=[]}
+  function saveCUS(){try{localStorage.setItem("rekap-pl-custom",JSON.stringify(CUS));localStorage.setItem("rekap-pl-hidden",JSON.stringify(HID))}catch(e){}}
+  function keyOf(n){return n.toLowerCase().replace(/\s+/g," ").trim().replace(/^iphone\b/,"ip")}
+  function isBase(k){return BASE.some(function(b){return b[0]===k})}
+  function allPL(){
+    var out=CUS.slice(), seen={};
+    CUS.forEach(function(c){seen[c[0]]=1});
+    BASE.forEach(function(b){if(!seen[b[0]]&&HID.indexOf(b[0])<0)out.push([b[0],b[1],b[2]*1000,b[3]*1000,b[4]*1000,1])});
+    return out;
+  }
+  function renderPL(){
+    $("pl").innerHTML='<thead><tr><th>Model</th><th>24 Jam</th><th>12 Jam</th><th>6 Jam</th><th></th></tr></thead><tbody>'+allPL().map(function(m){
+      var k=esc(m[0]), tag=m[5]?'':' <i style="color:var(--mute);font-style:normal">('+(isBase(m[0])?'diubah':'manual')+')</i>';
+      return '<tr><td>'+esc(m[1])+tag+'</td><td>'+rp(m[2])+'</td><td>'+rp(m[3])+'</td><td>'+rp(m[4])+'</td><td><button class="del" data-e="'+k+'">Ubah</button> <button class="del" data-d="'+k+'">Hapus</button></td></tr>';
+    }).join("")+'</tbody>';
+    $("plrest").style.display=HID.length?"":"none";
+  }
+  function endEdit(){
+    editKey=null; $("pladd").textContent="Simpan harga"; $("plcancel").style.display="none";
+    ["pn","pp24","pp12","pp6"].forEach(function(i){$(i).value=""});
+  }
+  renderPL();
+  $("pladd").onclick=function(){
+    var n=$("pn").value.trim().replace(/\s+/g," "), a=$("pp24").value, b=$("pp12").value, c=$("pp6").value;
+    if(!n||a===""||b===""||c===""){alert("Isi nama unit dan ketiga harga (24, 12, dan 6 Jam).");return}
+    var k=keyOf(n);
+    if(editKey&&editKey!==k){
+      CUS=CUS.filter(function(x){return x[0]!==editKey});
+      if(isBase(editKey)&&HID.indexOf(editKey)<0)HID.push(editKey);
+    }
+    CUS=CUS.filter(function(x){return x[0]!==k});
+    HID=HID.filter(function(x){return x!==k});
+    CUS.push([k,n,+a,+b,+c]);
+    saveCUS(); endEdit(); renderPL(); autoPrice();
+  };
+  $("plcancel").onclick=endEdit;
+  $("plrest").onclick=function(){HID=[];saveCUS();renderPL();autoPrice()};
+  $("pl").onclick=function(e){
+    var d=e.target.dataset&&e.target.dataset.d, ed=e.target.dataset&&e.target.dataset.e;
+    if(d&&confirm("Hapus unit ini dari daftar harga?")){
+      CUS=CUS.filter(function(x){return x[0]!==d});
+      if(isBase(d)&&HID.indexOf(d)<0)HID.push(d);
+      if(editKey===d)endEdit();
+      saveCUS(); renderPL(); autoPrice();
+    }
+    if(ed){
+      var m=allPL().filter(function(x){return x[0]===ed})[0];
+      if(m){
+        editKey=ed;
+        $("pn").value=m[1];$("pp24").value=m[2];$("pp12").value=m[3];$("pp6").value=m[4];
+        $("pladd").textContent="Perbarui harga"; $("plcancel").style.display="";
+        try{$("pn").scrollIntoView({block:"center"})}catch(x){}
+        $("pn").focus();
+      }
+    }
+  };
+  $("ip").oninput=autoPrice; $("du").onchange=autoPrice;
+  $("copyinv").onclick=function(){
+    var b=$("copyinv");
+    try{navigator.clipboard.writeText(invTxt).then(function(){b.textContent="Tersalin"; setTimeout(function(){b.textContent="Salin rekap investor"},1500)})}catch(e){prompt("Salin rekap:",invTxt)}
+  };
+  render();
+
+  (function(){
+    $("badge").textContent=ADMIN?"Admin":"Penonton";
+    $("shkl").textContent=ADMIN?"Kunci admin":"Kunci penonton";
+    if(!ADMIN&&location.hash.indexOf("#cfg=")===0){
+      try{
+        var o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(location.hash.slice(5))))));
+        if(o&&o.u&&o.k){cfg={url:o.u,key:o.k};localStorage.setItem(CK,JSON.stringify(cfg))}
+      }catch(e){}
+      try{history.replaceState(null,"",location.pathname)}catch(e){}
+    }
+    try{$("shvk").value=localStorage.getItem("rekap-admin-vk")||""}catch(e){}
+    $("shvk").oninput=function(){try{localStorage.setItem("rekap-admin-vk",this.value)}catch(e){}};
+    $("shlink").onclick=function(){
+      var vk=$("shvk").value.trim();
+      if(!cfg.url||!vk){alert("Hubungkan Google Sheets dan isi kunci penonton dulu.");return}
+      var enc=encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify({u:cfg.url,k:vk}))))),
+          link=location.origin+location.pathname.replace(/[^\/]*$/,"")+"index.html#cfg="+enc;
+      try{navigator.clipboard.writeText(link).then(function(){$("shlink").textContent="Tautan tersalin";setTimeout(function(){$("shlink").textContent="Salin tautan penonton"},1800)})}catch(e){prompt("Salin tautan penonton:",link)}
+    };
+    if(!cfg.url){setSync(ADMIN?"Data tersimpan di browser ini. Hubungkan Google Sheets untuk backup.":"Belum terhubung. Buka tautan penonton dari admin, atau isi alamat dan kunci penonton di bawah.");return}
+    $("shurl").value=cfg.url; $("shkey").value=cfg.key;
+    var old=false;
+    try{old=ADMIN&&localStorage.getItem("rekap-dirty")==="1"; if(ADMIN)localStorage.removeItem("rekap-dirty")}catch(e){}
+    if(queue.length)flush(); else pull(old);
+  })();
+
+  $("shconn").onclick=function(){
+    var u=$("shurl").value.trim();
+    if(!/^https:\/\/script\.google\.com\//.test(u)){alert("Alamat harus diawali https://script.google.com/");return}
+    cfg={url:u,key:$("shkey").value};
+    try{localStorage.setItem(CK,JSON.stringify(cfg))}catch(e){}
+    pull(true);
+  };
+  function bk(){return JSON.stringify({v:1,rentals:data.rentals})}
+  $("bkcopy").onclick=function(){
+    var b=$("bkcopy");
+    try{navigator.clipboard.writeText(bk()).then(function(){b.textContent="Tersalin";setTimeout(function(){b.textContent="Salin teks cadangan"},1500)})}catch(e){$("bktxt").value=bk()}
+  };
+  $("bkfile").onclick=function(){
+    try{claude.use("downloads").then(function(d){
+      if(!d){$("bktxt").value=bk();alert("Simpan file tidak tersedia di sini. Teks cadangan ditaruh di kotak, silakan salin.");return}
+      return d.save({filename:"cadangan-rekap-sewa.json",data:bk()});
+    }).catch(function(){})}catch(e){$("bktxt").value=bk()}
+  };
+  $("bkrestore").onclick=function(){
+    try{
+      var o=JSON.parse($("bktxt").value);
+      if(!o||!Array.isArray(o.rentals))throw 0;
+      if(!confirm("Ganti semua data sekarang dengan cadangan ini?"))return;
+      data.rentals=o.rentals; save(); render(); enqueue({op:"replace",rentals:o.rentals}); $("bktxt").value=""; alert("Data dipulihkan.");
+    }catch(e){alert("Teks cadangan tidak valid.")}
+  };
+})();
+</script>
+</body>
+</html>
